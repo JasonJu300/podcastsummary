@@ -7,7 +7,7 @@ compatibility_date = "2024-09-23"
 [assets]
 directory = "../dist"
 binding = "ASSETS"
-not_found_handling = "single_page_app"
+not_found_handling = "single-page-application"
 
 # Non-sensitive vars only. Secrets go in .dev.vars (local) or `wrangler secret` (github)
 [vars]
