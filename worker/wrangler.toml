@@ -1,0 +1,20 @@
+name = "podcast-summarizer"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+
+# Cloudflare Assets (Beta) Configuration
+# Serve frontend from worker domain
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+not_found_handling = "single_page_app"
+
+# Non-sensitive vars only. Secrets go in .dev.vars (local) or `wrangler secret` (github)
+[vars]
+ARK_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3"
+
+# Production Database
+[[d1_databases]]
+binding = "DB"
+database_name = "podcast-summarizer-db"
+database_id = "fc6e3d62-6bb0-4d7c-9ac7-85215cb53a64"

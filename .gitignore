@@ -11,7 +11,7 @@ node_modules
 dist
 .dev.vars
 worker/.dev.vars
-worker/wrangler.toml
+
 dist-ssr
 *.local
 
