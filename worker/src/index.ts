@@ -52,19 +52,17 @@ app.post('/api/auth/login', async (c) => {
 
 // ============ Auth Middleware ============
 
+// ============ Auth Middleware (No-Auth Mode) ============
+
 async function authMiddleware(c: any, next: any) {
-  const token = getAuthToken(c.req.headers);
+  // In No-Auth mode, we bypass token check and inject a guest user
+  // This allows the frontend to work without login, while keeping backend logic (user_id) intact
+  const guestUser = {
+    userId: 'guest-user',
+    username: 'guest'
+  };
 
-  if (!token) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
-
-  const payload = await verifyToken(token, c.env);
-  if (!payload) {
-    return c.json({ error: 'Invalid token' }, 401);
-  }
-
-  c.set('user', payload);
+  c.set('user', guestUser);
   await next();
 }
 

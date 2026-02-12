@@ -20,60 +20,35 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('podcast_user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem('podcast_user');
-      }
-    }
-    setIsLoading(false);
-  }, []);
+  // Simplified useAuth for No-Auth Mode
+  export function useAuth() {
+    // Always return a guest user
+    const [user] = useState<User | null>({
+      id: 'guest-user', // Changed userId to id to match User type
+      username: 'guest',
+      token: 'no-token-needed'
+    });
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
+    const [isLoading] = useState(false);
 
-      if (!response.ok) return false;
+    const login = async () => {
+      // No-op in no-auth mode
+      console.log('Login not required in no-auth mode');
+      return true; // Added return true to match original login signature
+    };
 
-      const data = await response.json() as { userId: string; username: string; token: string };
+    const logout = () => {
+      // No-op
+    };
 
-      const userData: User = {
-        id: data.userId,
-        username: data.username,
-        token: data.token,
-      };
-
-      setUser(userData);
-      localStorage.setItem('podcast_user', JSON.stringify(userData));
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('podcast_user');
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    return {
+      user,
+      isLoading,
+      login,
+      logout
+    };
   }
-  return context;
-}
+
+  export function AuthProvider({ children }: { children: ReactNode }) {
+    return <>{children}</>;
+  }

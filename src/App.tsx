@@ -23,9 +23,7 @@ function MainApp() {
     );
   }
 
-  if (!user) {
-    return <Login />;
-  }
+  // import { Login } from './components/Login';
 
   const handleProcessed = () => {
     setRefreshKey(k => k + 1);
