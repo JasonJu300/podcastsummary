@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
+import { useState, createContext, useContext, type ReactNode } from 'react';
 import type { User } from '../types';
 
 interface AuthContextType {
@@ -10,45 +10,39 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
+// No-Auth Mode: Simplified AuthProvider
+export function AuthProvider({ children }: { children: ReactNode }) {
+  // Always return a guest user
+  const [user] = useState<User | null>({
+    id: 'guest-user',
+    username: 'guest',
+    token: 'no-token-needed',
+    password_hash: '', // Adding missing required properties from User interface
+    created_at: new Date().toISOString()
+  });
 
-interface AuthProviderProps {
-  children: ReactNode;
+  const [isLoading] = useState(false);
+
+  const login = async () => {
+    console.log('Login not required in no-auth mode');
+    return true;
+  };
+
+  const logout = () => {
+    // No-op
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Simplified useAuth for No-Auth Mode
-  export function useAuth() {
-    // Always return a guest user
-    const [user] = useState<User | null>({
-      id: 'guest-user', // Changed userId to id to match User type
-      username: 'guest',
-      token: 'no-token-needed'
-    });
-
-    const [isLoading] = useState(false);
-
-    const login = async () => {
-      // No-op in no-auth mode
-      console.log('Login not required in no-auth mode');
-      return true; // Added return true to match original login signature
-    };
-
-    const logout = () => {
-      // No-op
-    };
-
-    return {
-      user,
-      isLoading,
-      login,
-      logout
-    };
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
   }
-
-  export function AuthProvider({ children }: { children: ReactNode }) {
-    return <>{children}</>;
-  }
+  return context;
+}

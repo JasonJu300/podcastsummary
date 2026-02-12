@@ -6,7 +6,14 @@ import { parseXiaoyuzhouUrl } from './utils/parser';
 import { submitTranscription, queryTranscription } from './utils/transcription';
 import { summarizeTranscript } from './utils/summarizer';
 
-const app = new Hono<{ Bindings: Env }>();
+type HonoEnv = {
+  Bindings: Env;
+  Variables: {
+    user: { userId: string; username: string };
+  };
+};
+
+const app = new Hono<HonoEnv>();
 
 // Enable CORS
 app.use('/*', cors({
