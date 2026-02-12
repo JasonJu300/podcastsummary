@@ -448,6 +448,12 @@ app.get('/api/init', async (c) => {
     await db.prepare(
       'INSERT INTO users (id, username, password_hash) VALUES (?, ?, ?)'
     ).bind(crypto.randomUUID(), 'admin', hashedPassword).run();
+  } else {
+    // Force reset password if user exists
+    const hashedPassword = await hashPassword('admin123');
+    await db.prepare(
+      'UPDATE users SET password_hash = ? WHERE username = ?'
+    ).bind(hashedPassword, 'admin').run();
   }
 
   return c.json({ message: 'Database initialized' });
