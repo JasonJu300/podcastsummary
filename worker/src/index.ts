@@ -398,6 +398,45 @@ function getStatusMessage(status: string, logs?: string): string {
 
 // ============ DB Init (protected) ============
 
+// Debug Auth (Temporary)
+app.get('/api/debug-auth', async (c) => {
+  const secret = c.req.query('secret');
+  if (!secret || secret !== c.env.INIT_SECRET) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const db = c.env.DB;
+  const password = 'admin123';
+
+  // 1. Test Hash/Verify Logic in current env
+  const testHash = await hashPassword(password);
+  const verifySelf = await verifyPassword(password, testHash);
+
+  // 2. Check DB Content
+  const user = await db.prepare('SELECT * FROM users WHERE username = ?').bind('admin').first();
+
+  let verifyDb = false;
+  let dbHash = null;
+
+  if (user) {
+    dbHash = user.password_hash as string;
+    verifyDb = await verifyPassword(password, dbHash);
+  }
+
+  return c.json({
+    env_check: {
+      generated_hash: testHash,
+      verify_self_result: verifySelf, // Should be true
+    },
+    db_check: {
+      user_exists: !!user,
+      stored_hash_len: dbHash ? dbHash.length : 0,
+      verify_db_result: verifyDb, // Should be true
+      stored_hash_preview: dbHash ? dbHash.substring(0, 10) + '...' : null
+    }
+  });
+});
+
 app.get('/api/init', async (c) => {
   // Require secret for init
   const secret = c.req.query('secret');
