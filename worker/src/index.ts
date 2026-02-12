@@ -482,6 +482,12 @@ app.get('/api/init', async (c) => {
     )
   `).run();
 
+  // Create default guest user (for no-auth mode)
+  // use INSERT OR IGNORE to avoid error if exists
+  await db.prepare(
+    `INSERT OR IGNORE INTO users (id, username, password_hash) VALUES (?, ?, ?)`
+  ).bind('guest-user', 'guest', 'nopass').run();
+
   // Create default user (admin/admin123)
   const existingUser = await db.prepare(
     'SELECT * FROM users WHERE username = ?'
